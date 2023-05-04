@@ -1,1 +1,1 @@
-export const API_URL = 'http://pixabay.com/api';
+export const API_URL = 'http://pixabay.com/api/';
