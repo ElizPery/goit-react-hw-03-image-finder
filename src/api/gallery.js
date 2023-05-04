@@ -1,16 +1,16 @@
 import { HTTPClient } from "./config";
 import { API_URL } from "constants/api";
 
-export const fetchGallery = (query) => {
+export const fetchGallery = (query, page) => {
     let baseOptions = {
         key: '34579319-e65916c8fd3357218f04822ae',
         image_type: 'photo',
         orientation: 'horizontal',
         safesearch: true,
-        page: 1,
+        page: page,
         per_page: 12,
-        q: query,
-    };
+        q: query.trim(),
+  };
 
     return  HTTPClient
       .get(
@@ -19,6 +19,7 @@ export const fetchGallery = (query) => {
       .then(({ data }) => ({
         items: data.hits,
         amount: data.hits.length,
+        page: page
         }));
 
 };

@@ -1,9 +1,13 @@
 import css from './ImageGalleryItem.module.css'
 
-const ImageGalleryItem = ({ smallImg }) => {
+const ImageGalleryItem = ({ smallImg, toggleModal, largeImageURL}) => {
   return (
-    <li className={css.ImageGalleryItem}>
-      <img src={smallImg} alt="" className={css.imageGalleryItemImage} />
+    <li className={css.ImageGalleryItem} onClick={()=>toggleModal(largeImageURL)} >
+      <img
+        src={smallImg}
+        alt=""
+        className={css.imageGalleryItemImage}
+      />
     </li>
   );
 };
