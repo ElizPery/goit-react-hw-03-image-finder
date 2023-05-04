@@ -10,48 +10,54 @@ import Modal from "components/Modal";
 export class App extends Component {
   state = {
     query: '',
-    data: {
-      items: [],
-      amount: 0,
-      page: 1
-    },
+    items: [],
+    total: 0,
+    page: 1,
     isError: false,
     isLoading: false,
     showModal: false,
-    modalData: ''
+    modalData: '',
+    tags: ''
   };
 
-  async componentDidUpdate(prevProps, prevState) {
-    const { query } = this.state;
+  componentDidUpdate(prevProps, prevState) {
+    const {
+      query,
+      page ,
+    } = this.state;
 
-    if (prevState.query !== query) {
-      const firstPage = 1;
-      this.setState({
-        isLoading: true,
-        isError: false,
-        data: {
-          items: [],
-          amount: 0,
-          page: 1,
-        },
-      });
-      
-      try {
-        const response = await fetchGallery(query, firstPage);
 
-        setTimeout(() => {
-          this.setState({
-            data: response,
-            isLoading: false,
-          });
-        }, 1000);
-
-        if (response.amount === 0) { this.setState({ isError: true }) }
-      } catch {
-        this.setState({ isError: true, isLoading: false });
-      }
+    if (prevState.query !== query || prevState.page !== page) {
+      this.fetchData(query, page);
     }
   }
+
+  fetchData = async (query, page) => {
+    this.setState({
+      isLoading: true,
+      isError: false,
+    });
+
+    if (query.trim() === '') {
+      return this.setState({ isError: true, isLoading: false});
+    }
+
+    try {
+      const response = await fetchGallery(query, page);
+
+      this.setState(prev => ({
+        items: [...prev.items, ...response.items],
+        total: response.total,
+        isLoading: false,
+      }));
+
+      if (response.total === 0) {
+        this.setState({ isError: true });
+      }
+    } catch {
+      this.setState({ isError: true, isLoading: false });
+    }
+  };
 
   onSubmit = e => {
     e.preventDefault();
@@ -60,74 +66,57 @@ export class App extends Component {
 
     this.setState({
       query: inputValue,
+      items: [],
+      total: 0,
+      page: 1,
     });
   };
 
-  handleLoadMore = async () => {
-    const { data: {page}, query } = this.state;
-
-    let pageNumber = page + 1
-    this.setState((prevState) => {
+  handleLoadMore = () => {
+    this.setState(prevState => {
       return {
-        ...prevState,
-        isLoading: true,
+        page: prevState.page + 1,
       };
     });
-
-    try {
-      const response = await fetchGallery(query, pageNumber);
-
-      setTimeout(() => {
-        this.setState(({ data: { items, amount }}) => ({
-          data: {
-            items: [...items, ...response.items],
-            amount: amount + response.amount,
-            page: pageNumber,
-          },
-          isLoading: false,
-        }));
-      }, 1000);
-    } catch {
-      this.setState({ isError: true, isLoading: false });
-    }
-  }
+  };
 
   onCloseModal = () => {
     this.setState({
       showModal: false,
     });
-  }
+  };
 
-  onOpenModal = (img) => {
+  onOpenModal = (img, alt) => {
     this.setState({
       showModal: true,
       modalData: img,
+      tags: alt
     });
-  }
+  };
 
   render() {
     const {
-      data: { items, amount },
+      items, total,
       isError,
       isLoading,
       showModal,
-      modalData
+      modalData,
+      tags
     } = this.state;
 
     const { onCloseModal, onSubmit, onOpenModal, handleLoadMore } = this;
+
+    const loadMore = total / items.length;
 
     return (
       <div className={css.app}>
         {showModal && (
           <Modal onClose={onCloseModal}>
-            <img src={modalData} alt="" width={800} />
+            <img src={modalData} alt={tags} width={800} />
           </Modal>
         )}
         <Searchbar onSubmit={onSubmit} />
-        <ImageGallery
-          items={items}
-          toggleModal={onOpenModal}
-        />
+        <ImageGallery items={items} toggleModal={onOpenModal} />
         {isLoading ? (
           <Loader />
         ) : (
@@ -136,10 +125,10 @@ export class App extends Component {
               <p>Something went wrong, please try another query</p>
             ) : (
               <>
-                {amount === 0 ? (
+                {total === 0 ? (
                   <p>Please enter your request</p>
                 ) : (
-                  <Button onClick={handleLoadMore} />
+                  (loadMore > 1) && (<Button onClick = { handleLoadMore } />)
                 )}
               </>
             )}
@@ -148,4 +137,4 @@ export class App extends Component {
       </div>
     );
   }
-};
+}

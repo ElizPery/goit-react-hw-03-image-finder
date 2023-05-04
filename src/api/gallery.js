@@ -18,8 +18,7 @@ export const fetchGallery = (query, page) => {
       )
       .then(({ data }) => ({
         items: data.hits,
-        amount: data.hits.length,
-        page: page
+        total: data.totalHits,
         }));
 
 };

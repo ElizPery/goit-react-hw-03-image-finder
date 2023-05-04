@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 const ImageGalleryItem = ({ smallImg, toggleModal, largeImageURL, alt}) => {
   return (
-    <li className={css.ImageGalleryItem} onClick={()=>toggleModal(largeImageURL)} >
+    <li className={css.ImageGalleryItem} onClick={()=>toggleModal(largeImageURL, alt)} >
       <img
         src={smallImg}
         alt={alt}
