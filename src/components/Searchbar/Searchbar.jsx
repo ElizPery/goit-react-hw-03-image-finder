@@ -1,5 +1,6 @@
 import css from './Searchbar.module.css';
-import { GrSearch}  from 'react-icons/gr';
+import { GrSearch } from 'react-icons/gr';
+import PropTypes from 'prop-types';
 
 const Searchbar = ({ onSubmit }) => {
   return (
@@ -21,3 +22,7 @@ const Searchbar = ({ onSubmit }) => {
 };
 
 export default Searchbar;
+
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired
+}

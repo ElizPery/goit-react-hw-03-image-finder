@@ -22,7 +22,9 @@ export class App extends Component {
   };
 
   async componentDidUpdate(prevProps, prevState) {
-    if (prevState.query !== this.state.query) {
+    const { query } = this.state;
+
+    if (prevState.query !== query) {
       const firstPage = 1;
       this.setState({
         isLoading: true,
@@ -35,7 +37,7 @@ export class App extends Component {
       });
       
       try {
-        const response = await fetchGallery(this.state.query, firstPage);
+        const response = await fetchGallery(query, firstPage);
 
         setTimeout(() => {
           this.setState({
@@ -62,7 +64,9 @@ export class App extends Component {
   };
 
   handleLoadMore = async () => {
-    let pageNumber = this.state.data.page + 1
+    const { data: {page}, query } = this.state;
+
+    let pageNumber = page + 1
     this.setState((prevState) => {
       return {
         ...prevState,
@@ -71,13 +75,13 @@ export class App extends Component {
     });
 
     try {
-      const response = await fetchGallery(this.state.query, pageNumber);
+      const response = await fetchGallery(query, pageNumber);
 
       setTimeout(() => {
-        this.setState(prevState => ({
+        this.setState(({ data: { items, amount }}) => ({
           data: {
-            items: [...prevState.data.items, ...response.items],
-            amount: prevState.data.amount + response.amount,
+            items: [...items, ...response.items],
+            amount: amount + response.amount,
             page: pageNumber,
           },
           isLoading: false,
@@ -88,20 +92,13 @@ export class App extends Component {
     }
   }
 
-  // toggleModal = (e) => {
-  //   this.setState((state) => ({
-  //     showModal: !state.showModal,
-  //   }))
-  //   console.log(e.target)
-  // }
-
-  onClose = () => {
+  onCloseModal = () => {
     this.setState({
       showModal: false,
     });
   }
 
-  onOpen = (img) => {
+  onOpenModal = (img) => {
     this.setState({
       showModal: true,
       modalData: img,
@@ -109,30 +106,40 @@ export class App extends Component {
   }
 
   render() {
+    const {
+      data: { items, amount },
+      isError,
+      isLoading,
+      showModal,
+      modalData
+    } = this.state;
+
+    const { onCloseModal, onSubmit, onOpenModal, handleLoadMore } = this;
+
     return (
       <div className={css.app}>
-        {this.state.showModal && (
-          <Modal onClose={this.onClose}>
-            <img src={this.state.modalData} alt="" width={800} />
+        {showModal && (
+          <Modal onClose={onCloseModal}>
+            <img src={modalData} alt="" width={800} />
           </Modal>
         )}
-        <Searchbar onSubmit={this.onSubmit} />
+        <Searchbar onSubmit={onSubmit} />
         <ImageGallery
-          items={this.state.data.items}
-          toggleModal={this.onOpen}
+          items={items}
+          toggleModal={onOpenModal}
         />
-        {this.state.isLoading ? (
+        {isLoading ? (
           <Loader />
         ) : (
           <>
-            {this.state.isError ? (
-              <p>Something went wrong please try another query</p>
+            {isError ? (
+              <p>Something went wrong, please try another query</p>
             ) : (
               <>
-                {this.state.data.amount === 0 ? (
+                {amount === 0 ? (
                   <p>Please enter your request</p>
                 ) : (
-                  <Button onClick={this.handleLoadMore} />
+                  <Button onClick={handleLoadMore} />
                 )}
               </>
             )}
