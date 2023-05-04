@@ -12,10 +12,13 @@ export const fetchGallery = (query) => {
         q: query,
     };
 
-    return HTTPClient
+    return  HTTPClient
       .get(
         API_URL, {params: baseOptions}
       )
-        .then(({ data }) => data.hits);
+      .then(({ data }) => ({
+        items: data.hits,
+        amount: data.hits.length,
+        }));
 
 };
